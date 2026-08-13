@@ -1,0 +1,4 @@
+"CFBundleDisplayName" = "Starforge Staff";
+"NSCameraUsageDescription" = "Starforge Staff uses the camera when you choose to send a learning photo.";
+"NSMicrophoneUsageDescription" = "Starforge Staff uses the microphone when you record a voice message.";
+"NSPhotoLibraryUsageDescription" = "Starforge Staff opens your photo library only when you choose media to share.";

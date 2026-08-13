@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <!-- Android 7.0 predates this public root. Bundling only the
+                 official root preserves API 24 compatibility without pinning
+                 Starforge to a rotating leaf or intermediate certificate. -->
+            <certificates src="@raw/isrg_root_x1" />
+        </trust-anchors>
+    </base-config>
+    <!-- User-installed certificates are accepted only by debuggable/profile
+         builds, so production traffic remains anchored to the system store. -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

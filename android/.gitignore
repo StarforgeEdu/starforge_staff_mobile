@@ -1,0 +1,18 @@
+/.gradle
+/captures/
+/local.properties
+GeneratedPluginRegistrant.java
+.cxx/
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/to/reference-keystore
+key.properties
+**/*.keystore
+**/*.jks
+**/*.p12
+**/*.pfx
+**/*.pem
+**/*.key
+
+# Public compatibility root; this is a certificate, never a private key.
+!app/src/main/res/raw/isrg_root_x1.pem

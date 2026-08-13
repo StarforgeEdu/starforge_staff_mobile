@@ -1,0 +1,4 @@
+"CFBundleDisplayName" = "Starforge Staff";
+"NSCameraUsageDescription" = "Starforge Staff использует камеру, когда вы выбираете отправку учебной фотографии.";
+"NSMicrophoneUsageDescription" = "Starforge Staff использует микрофон, когда вы записываете голосовое сообщение.";
+"NSPhotoLibraryUsageDescription" = "Starforge Staff открывает медиатеку только тогда, когда вы сами выбираете файл для отправки.";
