@@ -18,13 +18,16 @@ enum StaffRole {
 }
 
 enum AccentChoice {
-  indigo(Color(0xFF6C63E8)),
-  ocean(Color(0xFF087E8B)),
-  coral(Color(0xFFE85D75)),
-  forest(Color(0xFF2D8B73));
+  // Keep the persisted enum names stable while aligning the four choices with
+  // the shared Starforge web palettes: Saroy, Marvarid, Samarqand, and Daryo.
+  indigo(Color(0xFFB85535), Color(0xFFE4815B)),
+  ocean(Color(0xFF1F6B66), Color(0xFF67BBB4)),
+  coral(Color(0xFF2A3D8F), Color(0xFF8294E3)),
+  forest(Color(0xFF4F6A3A), Color(0xFF8DAA72));
 
-  const AccentChoice(this.color);
+  const AccentChoice(this.color, this.darkColor);
   final Color color;
+  final Color darkColor;
 }
 
 enum AuthResult { success, invalid, restricted, unavailable, rateLimited }
@@ -744,9 +747,10 @@ class AppController extends ChangeNotifier {
       (lesson) => !lesson.startsAt.isAfter(now) || lesson.isCancelled,
     );
     lessons.sort((left, right) => left.startsAt.compareTo(right.startsAt));
-    final meetings = can('meetings:read')
-        ? await _gateway.upcomingMeetings()
-        : const <MeetingInfo>[];
+    // Upcoming meetings are relationship-scoped by the service: invitees may
+    // read their own rows without holding the manager-only `meeting:write`
+    // capability. Do not gate this with a fictional `meetings:read` grant.
+    final meetings = await _gateway.upcomingMeetings();
     return TeacherDashboardData(
       groupsCount: groups.length,
       studentsCount: canReadStudents ? studentIds.length : null,
@@ -1373,12 +1377,15 @@ class AppController extends ChangeNotifier {
   }
 
   Future<List<ComplianceRuleInfo>> loadOwnRules() {
-    if (!can('rulebook:read')) return Future.value(const []);
+    // The `mine` endpoint is role-filtered for every authenticated user. The
+    // broader compliance catalogue uses `compliance:read`, but personal rules
+    // deliberately require no synthetic read capability.
+    if (!_isSignedIn) return Future.value(const []);
     return _gateway.ownRules();
   }
 
   Future<void> acknowledgeRule(int ruleId) {
-    if (!canMutate('rulebook:read')) {
+    if (!_isSignedIn || _account?.readOnly == true) {
       throw const StarforgeException(
         code: 'forbidden',
         message: 'This account cannot acknowledge this rule.',
@@ -1433,8 +1440,36 @@ class AppController extends ChangeNotifier {
   }
 
   Future<List<MeetingInfo>> loadUpcomingMeetings() {
-    if (!can('meetings:read')) return Future.value(const []);
+    if (!_isSignedIn) return Future.value(const []);
     return _gateway.upcomingMeetings();
+  }
+
+  Future<MeetingInfo> respondToMeeting(int meetingId, String response) {
+    if (!_isSignedIn || _account?.readOnly == true) {
+      throw const StarforgeException(
+        code: 'forbidden',
+        message: 'This account cannot respond to meeting invitations.',
+        statusCode: 403,
+      );
+    }
+    if (response != 'accepted' && response != 'declined') {
+      throw const StarforgeException(
+        code: 'validation_error',
+        message: 'Choose accept or decline.',
+        statusCode: 400,
+      );
+    }
+    final gateway = _gateway;
+    if (gateway is! MeetingResponseGateway) {
+      throw const StarforgeException(
+        code: 'unsupported',
+        message: 'Meeting responses are unavailable in this build.',
+      );
+    }
+    return (gateway as MeetingResponseGateway).respondToMeeting(
+      meetingId,
+      response,
+    );
   }
 
   Future<List<CrmLeadInfo>> loadCrmLeads() {
@@ -1730,11 +1765,11 @@ class AppController extends ChangeNotifier {
 
   Color _libraryColor(int seed) {
     const colors = [
-      Color(0xFF6559D5),
-      Color(0xFF138A7A),
-      Color(0xFFD45F73),
-      Color(0xFFC3782C),
-      Color(0xFF3976B8),
+      Color(0xFFB85535),
+      Color(0xFF1F6B66),
+      Color(0xFF4F6A3A),
+      Color(0xFF9A6B43),
+      Color(0xFF2A3D8F),
     ];
     return colors[seed.abs() % colors.length];
   }

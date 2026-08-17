@@ -117,10 +117,8 @@ class _PayslipSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF176B5B), Color(0xFF243F49)],
-        ),
-        borderRadius: BorderRadius.circular(27),
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

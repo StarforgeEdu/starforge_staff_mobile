@@ -4,10 +4,14 @@ import '../../core/app_controller.dart';
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/app_widgets.dart';
+import '../dashboard/meetings_page.dart';
+import '../dashboard/notifications_page.dart';
 import '../groups/assigned_students_page.dart';
 import '../library/library_page.dart';
 import '../print/print_page.dart';
+import '../profile/employment_pages.dart';
 import '../profile/profile_page.dart';
+import '../profile/rules_page.dart';
 import 'achievements_page.dart';
 import 'forms_page.dart';
 import 'reports_page.dart';
@@ -29,7 +33,8 @@ class WorkHubPage extends StatelessWidget {
           title: context.tr('assignedStudents'),
           detail: context.tr('assignedStudentsSubtitle'),
           icon: Icons.school_outlined,
-          color: const Color(0xFF2D8B73),
+          color: const Color(0xFF4F6A3A),
+          group: _WorkGroup.resources,
           page: const AssignedStudentsPage(),
         ),
       if (controller.can('content:read'))
@@ -37,7 +42,8 @@ class WorkHubPage extends StatelessWidget {
           title: context.tr('library'),
           detail: context.tr('librarySubtitle'),
           icon: Icons.folder_copy_outlined,
-          color: const Color(0xFF5867C9),
+          color: const Color(0xFF2A3D8F),
+          group: _WorkGroup.resources,
           page: const LibraryPage(),
         ),
       if (controller.can('forms:read'))
@@ -45,7 +51,8 @@ class WorkHubPage extends StatelessWidget {
           title: context.tr('formsSurveys'),
           detail: context.tr('formsSurveysSubtitle'),
           icon: Icons.ballot_outlined,
-          color: const Color(0xFF8C5CC4),
+          color: Theme.of(context).colorScheme.primary,
+          group: _WorkGroup.resources,
           page: const StaffFormsPage(),
         ),
       if (controller.can('printing:read'))
@@ -54,6 +61,7 @@ class WorkHubPage extends StatelessWidget {
           detail: context.tr('printerSubtitle'),
           icon: Icons.print_outlined,
           color: AppTheme.gold,
+          group: _WorkGroup.resources,
           page: const PrintPage(),
         ),
       if (controller.can('approvals:read'))
@@ -61,7 +69,8 @@ class WorkHubPage extends StatelessWidget {
           title: context.tr('requests'),
           detail: context.tr('requestsSubtitle'),
           icon: Icons.fact_check_outlined,
-          color: const Color(0xFFE26D5A),
+          color: Theme.of(context).colorScheme.primary,
+          group: _WorkGroup.now,
           page: const StaffRequestsPage(),
         ),
       if (controller.can('achievements:read'))
@@ -69,7 +78,8 @@ class WorkHubPage extends StatelessWidget {
           title: context.tr('achievements'),
           detail: context.tr('achievementsSubtitle'),
           icon: Icons.workspace_premium_outlined,
-          color: const Color(0xFFCB8E31),
+          color: AppTheme.gold,
+          group: _WorkGroup.resources,
           page: const StaffAchievementsPage(),
         ),
       if (controller.can('reports:read'))
@@ -77,23 +87,89 @@ class WorkHubPage extends StatelessWidget {
           title: context.tr('reports'),
           detail: context.tr('reportsSubtitle'),
           icon: Icons.description_outlined,
-          color: const Color(0xFF277DA1),
+          color: const Color(0xFF1F6B66),
+          group: _WorkGroup.resources,
           page: const StaffReportsPage(),
+        ),
+      if (controller.can('notifications:read'))
+        _WorkTool(
+          title: context.tr('notifications'),
+          detail: context.tr('notificationsEmptyBody'),
+          icon: Icons.notifications_none_rounded,
+          color: Theme.of(context).colorScheme.primary,
+          group: _WorkGroup.now,
+          page: const NotificationsPage(),
+        ),
+      if (controller.isSignedIn)
+        _WorkTool(
+          title: context.tr('meetingsTitle'),
+          detail: context.tr('meetingsSubtitle'),
+          icon: Icons.event_outlined,
+          color: const Color(0xFF1F6B66),
+          group: _WorkGroup.now,
+          page: const MeetingsPage(),
+        ),
+      if (controller.account?.principalKind == 'teacher')
+        _WorkTool(
+          title: context.tr('salaryHistory'),
+          detail: context.tr('salaryPrivate'),
+          icon: Icons.receipt_long_outlined,
+          color: const Color(0xFF4F6A3A),
+          group: _WorkGroup.account,
+          page: const SalaryHistoryPage(),
+        ),
+      if (controller.isSignedIn)
+        _WorkTool(
+          title: context.tr('rules'),
+          detail: context.tr('privacyAccountabilityBody'),
+          icon: Icons.policy_outlined,
+          color: AppTheme.gold,
+          group: _WorkGroup.account,
+          page: const RulesPage(),
         ),
       _WorkTool(
         title: context.tr('profile'),
         detail: controller.displayName,
         icon: Icons.person_outline_rounded,
         color: Theme.of(context).colorScheme.primary,
+        group: _WorkGroup.account,
         page: const ProfilePage(),
       ),
     ];
+    final sections = <Widget>[];
+    for (final group in _WorkGroup.values) {
+      final groupTools = tools
+          .where((tool) => tool.group == group)
+          .toList(growable: false);
+      if (groupTools.isEmpty) continue;
+      sections.add(
+        _WorkSectionHeader(
+          title: switch (group) {
+            _WorkGroup.now => context.tr('workNowTitle'),
+            _WorkGroup.resources => context.tr('workResourcesTitle'),
+            _WorkGroup.account => context.tr('workAccountTitle'),
+          },
+          count: groupTools.length,
+        ),
+      );
+      sections.addAll(
+        groupTools.map(
+          (tool) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _WorkToolRow(
+              tool: tool,
+              onTap: () => _open(context, tool.page),
+            ),
+          ),
+        ),
+      );
+      sections.add(const SizedBox(height: 8));
+    }
     return Scaffold(
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
           key: const PageStorageKey('workHubScroll'),
-          physics: const BouncingScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
               child: MaxWidthBox(
@@ -106,42 +182,16 @@ class WorkHubPage extends StatelessWidget {
             const SliverToBoxAdapter(child: SizedBox(height: 18)),
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
-                MediaQuery.sizeOf(context).width >= 1080
-                    ? (MediaQuery.sizeOf(context).width - 1080) / 2 + 20
+                MediaQuery.sizeOf(context).width >= 840
+                    ? (MediaQuery.sizeOf(context).width - 840) / 2 + 20
                     : 20,
                 0,
-                MediaQuery.sizeOf(context).width >= 1080
-                    ? (MediaQuery.sizeOf(context).width - 1080) / 2 + 20
+                MediaQuery.sizeOf(context).width >= 840
+                    ? (MediaQuery.sizeOf(context).width - 840) / 2 + 20
                     : 20,
                 36,
               ),
-              sliver: SliverLayoutBuilder(
-                builder: (context, constraints) {
-                  final columns = constraints.crossAxisExtent >= 820
-                      ? 3
-                      : constraints.crossAxisExtent >= 520
-                      ? 2
-                      : 1;
-                  return SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: columns,
-                      crossAxisSpacing: 13,
-                      mainAxisSpacing: 13,
-                      mainAxisExtent: 168,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => FadeSlideIn(
-                        delay: Duration(milliseconds: index * 45),
-                        child: _WorkToolCard(
-                          tool: tools[index],
-                          onTap: () => _open(context, tools[index].page),
-                        ),
-                      ),
-                      childCount: tools.length,
-                    ),
-                  );
-                },
-              ),
+              sliver: SliverList(delegate: SliverChildListDelegate(sections)),
             ),
           ],
         ),
@@ -156,27 +206,12 @@ class _WorkHero extends StatelessWidget {
   final int toolCount;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(24),
-    decoration: BoxDecoration(
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF163D3A), Color(0xFF34366F)],
-      ),
-      borderRadius: BorderRadius.circular(28),
-    ),
+  Widget build(BuildContext context) => PremiumCard(
+    padding: const EdgeInsets.all(22),
+    color: Theme.of(context).colorScheme.surfaceContainerLow,
     child: Row(
       children: [
-        Container(
-          width: 58,
-          height: 58,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: .12),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: const Icon(Icons.grid_view_rounded, color: Colors.white),
-        ),
+        const StarforgeMark(size: 46),
         const SizedBox(width: 17),
         Expanded(
           child: Column(
@@ -185,7 +220,7 @@ class _WorkHero extends StatelessWidget {
               Text(
                 context.tr('workHubTitle'),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -193,20 +228,59 @@ class _WorkHero extends StatelessWidget {
               Text(
                 context.tr('workHubSubtitle'),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: .75),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
         ),
-        StatusPill(label: '$toolCount', color: const Color(0xFF85D8CD)),
+        Container(
+          constraints: const BoxConstraints(minWidth: 42, minHeight: 42),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            '$toolCount',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+          ),
+        ),
       ],
     ),
   );
 }
 
-class _WorkToolCard extends StatelessWidget {
-  const _WorkToolCard({required this.tool, required this.onTap});
+class _WorkSectionHeader extends StatelessWidget {
+  const _WorkSectionHeader({required this.title, required this.count});
+
+  final String title;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(2, 10, 2, 10),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+        ),
+        Text(
+          '$count',
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _WorkToolRow extends StatelessWidget {
+  const _WorkToolRow({required this.tool, required this.onTap});
 
   final _WorkTool tool;
   final VoidCallback onTap;
@@ -214,37 +288,40 @@ class _WorkToolCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => PremiumCard(
     onTap: onTap,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    child: Row(
       children: [
-        Row(
-          children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: tool.color.withValues(alpha: .12),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Icon(tool.icon, color: tool.color),
-            ),
-            const Spacer(),
-            Icon(
-              Icons.arrow_forward_rounded,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ],
-        ),
-        const Spacer(),
-        Text(tool.title, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 5),
-        Text(
-          tool.detail,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+        Container(
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color: tool.color.withValues(alpha: .12),
+            borderRadius: BorderRadius.circular(14),
           ),
+          child: Icon(tool.icon, color: tool.color),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(tool.title, style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 3),
+              Text(
+                tool.detail,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Icon(
+          Icons.chevron_right_rounded,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ],
     ),
@@ -257,6 +334,7 @@ class _WorkTool {
     required this.detail,
     required this.icon,
     required this.color,
+    required this.group,
     required this.page,
   });
 
@@ -264,5 +342,8 @@ class _WorkTool {
   final String detail;
   final IconData icon;
   final Color color;
+  final _WorkGroup group;
   final Widget page;
 }
+
+enum _WorkGroup { now, resources, account }

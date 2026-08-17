@@ -20,34 +20,15 @@ class StarforgeMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final foreground = onDark
-        ? Colors.white
-        : Theme.of(context).colorScheme.onSurface;
+        ? const Color(0xFFFFFCF5)
+        : Theme.of(context).colorScheme.primary;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
+        SizedBox(
           width: size,
           height: size,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF9288FF), Color(0xFF5D55D8)],
-            ),
-            borderRadius: BorderRadius.circular(size * .32),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6C63E8).withValues(alpha: .28),
-                blurRadius: size * .42,
-                offset: Offset(0, size * .14),
-              ),
-            ],
-          ),
-          child: Icon(
-            Icons.auto_awesome_rounded,
-            color: Colors.white,
-            size: size * .52,
-          ),
+          child: CustomPaint(painter: _StarforgeMarkPainter(foreground)),
         ),
         if (showWordmark) ...[
           const SizedBox(width: 12),
@@ -56,13 +37,60 @@ class StarforgeMark extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: foreground,
               fontWeight: FontWeight.w800,
-              letterSpacing: -.5,
+              letterSpacing: -.3,
             ),
           ),
         ],
       ],
     );
   }
+}
+
+Path _starPath(Rect bounds, {bool cutout = true}) {
+  Offset point(double x, double y) => Offset(
+    bounds.left + bounds.width * x / 32,
+    bounds.top + bounds.height * y / 32,
+  );
+
+  final path = Path()
+    ..fillType = PathFillType.evenOdd
+    ..moveTo(point(16, 1).dx, point(16, 1).dy)
+    ..lineTo(point(19.4, 11.2).dx, point(19.4, 11.2).dy)
+    ..lineTo(point(29.9, 11.5).dx, point(29.9, 11.5).dy)
+    ..lineTo(point(21.3, 17.6).dx, point(21.3, 17.6).dy)
+    ..lineTo(point(24.5, 27.9).dx, point(24.5, 27.9).dy)
+    ..lineTo(point(16, 21.4).dx, point(16, 21.4).dy)
+    ..lineTo(point(7.5, 27.9).dx, point(7.5, 27.9).dy)
+    ..lineTo(point(10.7, 17.6).dx, point(10.7, 17.6).dy)
+    ..lineTo(point(2.1, 11.5).dx, point(2.1, 11.5).dy)
+    ..lineTo(point(12.6, 11.2).dx, point(12.6, 11.2).dy)
+    ..close();
+  if (cutout) {
+    final center = point(16, 16);
+    final radius = bounds.shortestSide * 2.2 / 32;
+    path.addOval(Rect.fromCircle(center: center, radius: radius));
+  }
+  return path;
+}
+
+class _StarforgeMarkPainter extends CustomPainter {
+  const _StarforgeMarkPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawPath(
+      _starPath(Offset.zero & size),
+      Paint()
+        ..color = color
+        ..isAntiAlias = true,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_StarforgeMarkPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 class PremiumCard extends StatelessWidget {
@@ -73,7 +101,7 @@ class PremiumCard extends StatelessWidget {
     this.color,
     this.onTap,
     this.border,
-    this.radius = 24,
+    this.radius = 16,
   });
 
   final Widget child;
@@ -86,19 +114,23 @@ class PremiumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(radius),
+      side:
+          border ??
+          BorderSide(color: scheme.outlineVariant.withValues(alpha: .88)),
+    );
     return Material(
       color: color ?? scheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(radius),
-        side:
-            border ??
-            BorderSide(color: scheme.outlineVariant.withValues(alpha: .42)),
-      ),
+      shape: shape,
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(padding: padding, child: child),
-      ),
+      child: onTap == null
+          ? Padding(padding: padding, child: child)
+          : InkWell(
+              onTap: onTap,
+              customBorder: shape,
+              child: Padding(padding: padding, child: child),
+            ),
     );
   }
 }
@@ -237,11 +269,11 @@ class PersonAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = [
-      const Color(0xFF6C63E8),
-      const Color(0xFF098B8C),
-      const Color(0xFFE76B81),
+      Theme.of(context).colorScheme.primary,
+      const Color(0xFF1F6B66),
+      const Color(0xFF4F6A3A),
       const Color(0xFF9A6B43),
-      const Color(0xFF4278C0),
+      const Color(0xFF2A3D8F),
     ];
     final resolved = color ?? palette[name.hashCode.abs() % palette.length];
     return SizedBox(
@@ -385,7 +417,7 @@ class PageIntro extends StatelessWidget {
   }
 }
 
-class EmptyState extends StatefulWidget {
+class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
     required this.title,
@@ -402,38 +434,6 @@ class EmptyState extends StatefulWidget {
   final IconData icon;
 
   @override
-  State<EmptyState> createState() => _EmptyStateState();
-}
-
-class _EmptyStateState extends State<EmptyState>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 2200),
-  )..repeat(reverse: true);
-  bool? _reduceMotion;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    if (_reduceMotion == reduceMotion) return;
-    _reduceMotion = reduceMotion;
-    if (reduceMotion) {
-      _controller.stop();
-      _controller.value = 0;
-    } else if (!_controller.isAnimating) {
-      _controller.repeat(reverse: true);
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Center(
@@ -442,49 +442,73 @@ class _EmptyStateState extends State<EmptyState>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) => Transform.translate(
-                offset: Offset(0, -4 * math.sin(_controller.value * math.pi)),
-                child: child,
+            Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Container(
-                width: 92,
-                height: 92,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(
-                    alpha: .7,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  widget.icon,
-                  size: 42,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
+              child: Icon(icon, size: 34, color: theme.colorScheme.primary),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 20),
             Text(
-              widget.title,
+              title,
               style: theme.textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              widget.body,
+              body,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
-            if (widget.action != null) ...[
+            if (action != null) ...[
               const SizedBox(height: 20),
-              OutlinedButton(
-                onPressed: widget.onAction,
-                child: Text(widget.action!),
-              ),
+              OutlinedButton(onPressed: onAction, child: Text(action!)),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class StarforgeLoader extends StatelessWidget {
+  const StarforgeLoader({super.key, this.label = 'Loading', this.size = 48});
+
+  final String label;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final scheme = Theme.of(context).colorScheme;
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: label,
+      child: SizedBox.square(
+        dimension: size,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (reduceMotion)
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: scheme.outlineVariant, width: 2),
+                ),
+              )
+            else
+              CircularProgressIndicator(
+                strokeWidth: 2.4,
+                color: scheme.primary,
+                backgroundColor: scheme.outlineVariant.withValues(alpha: .5),
+              ),
+            StarforgeMark(size: size * .38),
           ],
         ),
       ),
@@ -497,7 +521,7 @@ class FadeSlideIn extends StatefulWidget {
     super.key,
     required this.child,
     this.delay = Duration.zero,
-    this.offset = const Offset(0, .08),
+    this.offset = const Offset(0, .025),
   });
 
   final Widget child;
@@ -512,7 +536,7 @@ class _FadeSlideInState extends State<FadeSlideIn>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 600),
+    duration: const Duration(milliseconds: 280),
   );
   Timer? _delayTimer;
 
@@ -525,8 +549,8 @@ class _FadeSlideInState extends State<FadeSlideIn>
         _controller.value = 1;
         return;
       }
-      final safeDelay = widget.delay > const Duration(milliseconds: 320)
-          ? const Duration(milliseconds: 320)
+      final safeDelay = widget.delay > const Duration(milliseconds: 160)
+          ? const Duration(milliseconds: 160)
           : widget.delay;
       _delayTimer = Timer(safeDelay, () {
         if (mounted) _controller.forward();
@@ -557,42 +581,10 @@ class _FadeSlideInState extends State<FadeSlideIn>
   }
 }
 
-class StarfieldBackdrop extends StatefulWidget {
+class StarfieldBackdrop extends StatelessWidget {
   const StarfieldBackdrop({super.key, required this.child});
 
   final Widget child;
-
-  @override
-  State<StarfieldBackdrop> createState() => _StarfieldBackdropState();
-}
-
-class _StarfieldBackdropState extends State<StarfieldBackdrop>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 18),
-  )..repeat();
-  bool? _reduceMotion;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    if (_reduceMotion == reduceMotion) return;
-    _reduceMotion = reduceMotion;
-    if (reduceMotion) {
-      _controller.stop();
-      _controller.value = 0;
-    } else if (!_controller.isAnimating) {
-      _controller.repeat();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -601,74 +593,46 @@ class _StarfieldBackdropState extends State<StarfieldBackdrop>
         fit: StackFit.expand,
         children: [
           const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF11122B),
-                  Color(0xFF25265B),
-                  Color(0xFF121323),
-                ],
-                stops: [0, .55, 1],
-              ),
-            ),
+            decoration: BoxDecoration(color: AppTheme.darkCanvas),
           ),
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) => CustomPaint(
-              painter: _StarfieldPainter(progress: _controller.value),
-            ),
-          ),
-          widget.child,
+          const CustomPaint(painter: _BrandBackdropPainter()),
+          child,
         ],
       ),
     );
   }
 }
 
-class _StarfieldPainter extends CustomPainter {
-  const _StarfieldPainter({required this.progress});
-  final double progress;
+class _BrandBackdropPainter extends CustomPainter {
+  const _BrandBackdropPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
-    final random = math.Random(42);
-    for (var i = 0; i < 38; i++) {
-      final x = random.nextDouble() * size.width;
-      final baseY = random.nextDouble() * size.height;
-      final y = (baseY + progress * (12 + i % 7)) % size.height;
-      final radius = .55 + random.nextDouble() * 1.25;
-      final twinkle =
-          .23 + .37 * (1 + math.sin(progress * math.pi * 2 + i)) / 2;
-      canvas.drawCircle(
-        Offset(x, y),
-        radius,
-        Paint()..color = Colors.white.withValues(alpha: twinkle),
-      );
-    }
-    canvas.drawCircle(
-      Offset(size.width * .82, size.height * .18),
-      size.shortestSide * .22,
+    final large = math.min(size.width * .72, 430.0);
+    canvas.drawPath(
+      _starPath(
+        Rect.fromLTWH(size.width - large * .62, -large * .3, large, large),
+        cutout: false,
+      ),
       Paint()
-        ..shader =
-            RadialGradient(
-              colors: [
-                const Color(0xFF786EFF).withValues(alpha: .22),
-                Colors.transparent,
-              ],
-            ).createShader(
-              Rect.fromCircle(
-                center: Offset(size.width * .82, size.height * .18),
-                radius: size.shortestSide * .22,
-              ),
-            ),
+        ..color = const Color(0xFFE4815B).withValues(alpha: .10)
+        ..isAntiAlias = true,
+    );
+    final small = math.min(size.width * .28, 150.0);
+    canvas.drawPath(
+      _starPath(
+        Rect.fromLTWH(-small * .26, size.height - small * .78, small, small),
+      ),
+      Paint()
+        ..color = const Color(0xFFF4E9D3).withValues(alpha: .13)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2
+        ..isAntiAlias = true,
     );
   }
 
   @override
-  bool shouldRepaint(_StarfieldPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+  bool shouldRepaint(_BrandBackdropPainter oldDelegate) => false;
 }
 
 Future<T?> showAppSheet<T>({
@@ -772,8 +736,8 @@ class _ToastOverlayState extends State<_ToastOverlay>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 480),
-    reverseDuration: const Duration(milliseconds: 330),
+    duration: const Duration(milliseconds: 260),
+    reverseDuration: const Duration(milliseconds: 160),
   );
   Timer? _timer;
   bool _dismissed = false;
@@ -814,7 +778,7 @@ class _ToastOverlayState extends State<_ToastOverlay>
     final theme = Theme.of(context);
     final curved = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeOutBack,
+      curve: Curves.easeOutCubic,
     );
     final toastColor = widget.color ?? AppTheme.mint;
     final toastForeground = _withMinimumContrast(
@@ -835,7 +799,7 @@ class _ToastOverlayState extends State<_ToastOverlay>
           opacity: CurvedAnimation(parent: _controller, curve: Curves.easeOut),
           child: SlideTransition(
             position: Tween(
-              begin: const Offset(0, -.45),
+              begin: const Offset(0, -.16),
               end: Offset.zero,
             ).animate(curved),
             child: Center(
@@ -843,7 +807,7 @@ class _ToastOverlayState extends State<_ToastOverlay>
                 constraints: const BoxConstraints(maxWidth: 520),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.inverseSurface,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: .22),
@@ -856,7 +820,7 @@ class _ToastOverlayState extends State<_ToastOverlay>
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: _dismiss,
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(14),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 15,

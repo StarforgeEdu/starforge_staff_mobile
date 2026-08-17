@@ -198,22 +198,8 @@ class _GroupsHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(22, 21, 18, 21),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).colorScheme.primary,
-            const Color(0xFF34366F),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: .2),
-            blurRadius: 28,
-            offset: const Offset(0, 13),
-          ),
-        ],
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
@@ -339,14 +325,7 @@ class _GroupCard extends StatelessWidget {
           children: [
             Container(
               height: 6,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    theme.colorScheme.primary,
-                    theme.colorScheme.tertiary,
-                  ],
-                ),
-              ),
+              decoration: BoxDecoration(color: theme.colorScheme.primary),
             ),
             Expanded(
               child: Padding(

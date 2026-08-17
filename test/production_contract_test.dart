@@ -182,12 +182,7 @@ void main() {
           account: _account(
             name: 'Teaching Assistant',
             slug: 'assistant',
-            permissions: const {
-              'cohorts:*',
-              'students:*',
-              'attendance:*',
-              'meetings:read',
-            },
+            permissions: const {'cohorts:*', 'students:*', 'attendance:*'},
           ),
           groupsData: [_group(id: 1), _group(id: 2)],
           studentsByGroup: {
@@ -244,7 +239,7 @@ void main() {
     );
 
     test(
-      'assistant dashboard never requests ungranted student or meeting data',
+      'assistant dashboard skips ungranted students but reads scoped meetings',
       () async {
         final gateway = _ContractGateway(
           account: _account(
@@ -268,7 +263,44 @@ void main() {
         expect(dashboard!.studentsCount, isNull);
         expect(dashboard.nextMeeting, isEmpty);
         expect(gateway.studentCalls, 0);
-        expect(gateway.meetingCalls, 0);
+        expect(gateway.meetingCalls, 1);
+      },
+    );
+
+    test(
+      'invitees can respond without a fictional meeting read grant',
+      () async {
+        final startsAt = DateTime.now().add(const Duration(days: 1));
+        final gateway = _ContractGateway(
+          account: _account(permissions: const {}),
+          meetingsData: [
+            MeetingInfo(
+              id: 19,
+              title: 'Team sync',
+              agenda: 'Weekly operating review',
+              branchName: 'Central',
+              startsAt: startsAt,
+              endsAt: startsAt.add(const Duration(hours: 1)),
+              location: 'Room 4',
+              status: 'scheduled',
+            ),
+          ],
+        );
+        final controller = await AppController.load(
+          gateway: gateway,
+          restoreSession: false,
+        );
+        await controller.signIn(
+          username: 'staff',
+          password: 'correct-password',
+        );
+
+        expect(await controller.loadUpcomingMeetings(), hasLength(1));
+        final updated = await controller.respondToMeeting(19, 'accepted');
+
+        expect(updated.response, 'accepted');
+        expect(gateway.meetingResponseCalls, 1);
+        expect(gateway.lastMeetingResponse, 'accepted');
       },
     );
 
@@ -409,7 +441,7 @@ void main() {
   });
 }
 
-class _ContractGateway implements StarforgeGateway {
+class _ContractGateway implements StarforgeGateway, MeetingResponseGateway {
   _ContractGateway({
     StaffAccount? account,
     this.hasSession = false,
@@ -431,6 +463,8 @@ class _ContractGateway implements StarforgeGateway {
   int teacherDashboardCalls = 0;
   int studentCalls = 0;
   int meetingCalls = 0;
+  int meetingResponseCalls = 0;
+  String? lastMeetingResponse;
   int transitionCalls = 0;
   int? requestedBranchId;
   int? requestedGroupId;
@@ -491,6 +525,24 @@ class _ContractGateway implements StarforgeGateway {
   Future<List<MeetingInfo>> upcomingMeetings() async {
     meetingCalls++;
     return meetingsData;
+  }
+
+  @override
+  Future<MeetingInfo> respondToMeeting(int meetingId, String response) async {
+    meetingResponseCalls++;
+    lastMeetingResponse = response;
+    final meeting = meetingsData.firstWhere((item) => item.id == meetingId);
+    return MeetingInfo(
+      id: meeting.id,
+      title: meeting.title,
+      agenda: meeting.agenda,
+      branchName: meeting.branchName,
+      startsAt: meeting.startsAt,
+      endsAt: meeting.endsAt,
+      location: meeting.location,
+      status: meeting.status,
+      response: response,
+    );
   }
 
   @override

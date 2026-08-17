@@ -262,6 +262,7 @@ class _RoleDashboardPageState extends State<RoleDashboardPage> {
                     child: _OperationalRow(
                       row: previewRows[index],
                       color: palette.color,
+                      onTap: widget.onOpenWorkspace,
                     ),
                   ),
                 ),
@@ -323,6 +324,17 @@ class _RoleWorkspacePageState extends State<RoleWorkspacePage> {
 
   void _open(Widget page) {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+  }
+
+  void _openRow(_OperationalData row, Color color) {
+    showAppSheet<void>(
+      context: context,
+      builder: (sheetContext) => _OperationalDetailSheet(
+        row: row,
+        color: color,
+        onClose: () => Navigator.of(sheetContext).pop(),
+      ),
+    );
   }
 
   @override
@@ -409,9 +421,11 @@ class _RoleWorkspacePageState extends State<RoleWorkspacePage> {
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 11)),
               if (_loading && _data == null)
-                const SliverFillRemaining(
+                SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(
+                    child: StarforgeLoader(label: context.tr('queue')),
+                  ),
                 )
               else if (rows.isEmpty)
                 SliverFillRemaining(
@@ -431,6 +445,7 @@ class _RoleWorkspacePageState extends State<RoleWorkspacePage> {
                     child: _OperationalRow(
                       row: rows[index],
                       color: palette.color,
+                      onTap: () => _openRow(rows[index], palette.color),
                     ),
                   ),
                 ),
@@ -506,7 +521,7 @@ class _RoleSnapshot {
         safe(controller.loadNotifications, const <NotificationInfo>[])
       else
         Future.value(const <NotificationInfo>[]),
-      if (controller.can('meetings:read'))
+      if (controller.isSignedIn)
         safe(controller.loadUpcomingMeetings, const <MeetingInfo>[])
       else
         Future.value(const <MeetingInfo>[]),
@@ -590,6 +605,15 @@ class _RoleSnapshot {
                       ).add_Hm().format(item.nextFollowUpAt!.toLocal()),
                 icon: Icons.person_search_outlined,
                 urgent: item.nextFollowUpAt?.isBefore(DateTime.now()) == true,
+                details: [
+                  if (item.phone.isNotEmpty)
+                    '${context.tr('phone')}: ${item.phone}',
+                  if (item.branchName.isNotEmpty)
+                    '${context.tr('branch')}: ${item.branchName}',
+                  if (item.departmentName.isNotEmpty)
+                    '${context.tr('department')}: ${item.departmentName}',
+                  if (item.state.isNotEmpty) item.state,
+                ],
               ),
             )
             .toList(growable: false);
@@ -606,6 +630,13 @@ class _RoleSnapshot {
                     ).add_Hm().format(item.openedAt!.toLocal()),
               icon: Icons.point_of_sale_outlined,
               urgent: item.discrepancy != 0,
+              details: [
+                '${NumberFormat.decimalPattern().format(item.openingCash.round())} UZS',
+                if (item.closingCash != 0)
+                  '${NumberFormat.decimalPattern().format(item.closingCash.round())} UZS',
+                if (item.discrepancy != 0)
+                  '${NumberFormat.decimalPattern().format(item.discrepancy.round())} UZS',
+              ],
             ),
           ),
           ...invoices.map(
@@ -618,6 +649,10 @@ class _RoleSnapshot {
               urgent:
                   item.outstanding > 0 &&
                   item.dueDate?.isBefore(DateTime.now()) == true,
+              details: [
+                item.status,
+                '${NumberFormat.decimalPattern().format(item.total.round())} ${item.currency}',
+              ],
             ),
           ),
         ];
@@ -683,6 +718,11 @@ class _RoleSnapshot {
           ).add_Hm().format(item.startsAt.toLocal()),
           icon: Icons.groups_outlined,
           urgent: item.startsAt.difference(DateTime.now()).inHours < 24,
+          details: [
+            if (item.agenda.isNotEmpty) item.agenda,
+            if (item.branchName.isNotEmpty)
+              '${context.tr('branch')}: ${item.branchName}',
+          ],
         ),
       ),
       ...notifications
@@ -720,56 +760,35 @@ class _RoleHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [palette.color, Color.lerp(palette.color, Colors.black, .4)!],
-        ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: palette.color.withValues(alpha: .2),
-            blurRadius: 30,
-            offset: const Offset(0, 14),
-          ),
-        ],
-      ),
+    final scheme = Theme.of(context).colorScheme;
+    return PremiumCard(
+      padding: const EdgeInsets.all(20),
+      color: scheme.surfaceContainerLow,
+      onTap: onOpen,
       child: Row(
         children: [
           Container(
-            width: 54,
-            height: 54,
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: .15),
-              borderRadius: BorderRadius.circular(18),
+              color: palette.color.withValues(alpha: .12),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(palette.icon, color: Colors.white, size: 28),
+            child: Icon(palette.icon, color: palette.color, size: 25),
           ),
           const SizedBox(width: 15),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  context.tr('todaysFocus'),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelMedium?.copyWith(color: Colors.white70),
-                ),
-                const SizedBox(height: 5),
                 if (loading)
-                  const LinearProgressIndicator(color: Colors.white)
+                  const LinearProgressIndicator()
                 else
                   Text(
                     focus?.title ?? context.tr('noItems'),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                 if (focus?.subtitle.isNotEmpty == true) ...[
                   const SizedBox(height: 4),
@@ -777,7 +796,9 @@ class _RoleHero extends StatelessWidget {
                     focus!.subtitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white70),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ],
@@ -786,11 +807,7 @@ class _RoleHero extends StatelessWidget {
           IconButton(
             onPressed: onOpen,
             tooltip: palette.workspaceLabel,
-            style: IconButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: Colors.white.withValues(alpha: .15),
-            ),
-            icon: const Icon(Icons.arrow_forward_rounded),
+            icon: const Icon(Icons.chevron_right_rounded),
           ),
         ],
       ),
@@ -799,10 +816,11 @@ class _RoleHero extends StatelessWidget {
 }
 
 class _OperationalRow extends StatelessWidget {
-  const _OperationalRow({required this.row, required this.color});
+  const _OperationalRow({required this.row, required this.color, this.onTap});
 
   final _OperationalData row;
   final Color color;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -817,6 +835,7 @@ class _OperationalRow extends StatelessWidget {
       label: semanticLabel,
       excludeSemantics: true,
       child: PremiumCard(
+        onTap: onTap,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
@@ -894,9 +913,130 @@ class _OperationalRow extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (onTap != null) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ],
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _OperationalDetailSheet extends StatelessWidget {
+  const _OperationalDetailSheet({
+    required this.row,
+    required this.color,
+    required this.onClose,
+  });
+
+  final _OperationalData row;
+  final Color color;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = row.urgent ? AppTheme.coral : color;
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        8,
+        20,
+        MediaQuery.paddingOf(context).bottom + 24,
+      ),
+      child: MaxWidthBox(
+        maxWidth: 680,
+        padding: EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: .12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(row.icon, color: accent),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        row.title,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      if (row.subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          row.subtitle,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (row.meta.isNotEmpty) ...[
+              const SizedBox(height: 18),
+              Text(
+                row.meta,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(color: accent),
+              ),
+            ],
+            if (row.details.isNotEmpty) ...[
+              const SizedBox(height: 18),
+              ...row.details
+                  .where((value) => value.isNotEmpty)
+                  .map(
+                    (value) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 7),
+                            child: Container(
+                              width: 5,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: accent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(child: Text(value)),
+                        ],
+                      ),
+                    ),
+                  ),
+            ],
+            const SizedBox(height: 18),
+            FilledButton.tonal(
+              onPressed: onClose,
+              child: Text(context.tr('close')),
+            ),
+          ],
         ),
       ),
     );
@@ -992,6 +1132,7 @@ class _OperationalData {
     required this.meta,
     required this.icon,
     this.urgent = false,
+    this.details = const [],
   });
 
   final String title;
@@ -999,6 +1140,7 @@ class _OperationalData {
   final String meta;
   final IconData icon;
   final bool urgent;
+  final List<String> details;
 }
 
 class _RolePalette {

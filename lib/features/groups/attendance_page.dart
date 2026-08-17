@@ -656,15 +656,8 @@ class _AttendanceHero extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(20),
     decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Theme.of(context).colorScheme.primary,
-          const Color(0xFF34366E),
-        ],
-      ),
-      borderRadius: BorderRadius.circular(26),
+      color: Theme.of(context).colorScheme.primary,
+      borderRadius: BorderRadius.circular(16),
     ),
     child: Row(
       children: [
@@ -765,17 +758,8 @@ class _TodayAttendanceCardState extends State<_TodayAttendanceCard> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF6C63E8), Color(0xFF3C3D78)],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF6C63E8).withValues(alpha: .22),
-            blurRadius: 28,
-            offset: const Offset(0, 13),
-          ),
-        ],
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2066,13 +2050,8 @@ class _TakeAttendancePageState extends State<TakeAttendancePage> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Theme.of(context).colorScheme.primary,
-                        const Color(0xFF3B3D78),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(22),
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

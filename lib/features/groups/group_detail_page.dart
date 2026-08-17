@@ -230,7 +230,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                           _group.capacity?.toString() ?? '—',
                           context.tr('capacity'),
                           Icons.event_seat_outlined,
-                          const Color(0xFFE07886),
+                          AppTheme.gold,
                         ),
                       ];
                       final textScale = MediaQuery.textScalerOf(
@@ -425,22 +425,8 @@ class _GroupHero extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).colorScheme.primary,
-            const Color(0xFF30336E),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: .18),
-            blurRadius: 30,
-            offset: const Offset(0, 14),
-          ),
-        ],
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -720,13 +706,8 @@ class _CycleProgressCard extends StatelessWidget {
                     width: 46,
                     height: 46,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          theme.colorScheme.primary,
-                          theme.colorScheme.tertiary,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(15),
+                      color: theme.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(
                       Icons.track_changes_rounded,

@@ -438,22 +438,8 @@ class _MotivationCard extends StatelessWidget {
     final primary = theme.colorScheme.primary;
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color.lerp(primary, Colors.white, .08)!,
-            Color.lerp(primary, const Color(0xFF342F72), .48)!,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: .18),
-            blurRadius: 30,
-            offset: const Offset(0, 14),
-          ),
-        ],
+        color: primary,
+        borderRadius: BorderRadius.circular(16),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
@@ -706,13 +692,14 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final actions =
         <(IconData, String, Color, VoidCallback, FeatureAvailabilityStatus?)>[
           if (onAttendance != null)
             (
               Icons.fact_check_outlined,
               context.tr('takeAttendance'),
-              const Color(0xFF6C63E8),
+              primary,
               onAttendance!,
               attendanceStatus,
             ),
@@ -728,7 +715,7 @@ class _QuickActions extends StatelessWidget {
             (
               Icons.local_library_outlined,
               context.tr('library'),
-              const Color(0xFFE06B83),
+              const Color(0xFF1F6B66),
               onLibrary!,
               libraryStatus,
             ),
@@ -836,13 +823,9 @@ class _OverviewMetrics extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final metrics = [
-      (
-        '$groups',
-        context.tr('groups'),
-        Icons.groups_outlined,
-        const Color(0xFF6C63E8),
-      ),
+      ('$groups', context.tr('groups'), Icons.groups_outlined, primary),
       (
         students?.toString() ?? '—',
         context.tr('students'),
@@ -853,7 +836,7 @@ class _OverviewMetrics extends StatelessWidget {
         '$upcomingLessons',
         context.tr('upcoming'),
         Icons.event_available_outlined,
-        const Color(0xFFE07886),
+        AppTheme.gold,
       ),
     ];
     return LayoutBuilder(
@@ -958,9 +941,9 @@ class _ScheduleCard extends StatelessWidget {
       child: Column(
         children: lessons.take(5).map((lesson) {
           final color = [
-            const Color(0xFF6C63E8),
-            const Color(0xFF31977E),
-            const Color(0xFFE06B83),
+            Theme.of(context).colorScheme.primary,
+            const Color(0xFF1F6B66),
+            AppTheme.gold,
           ][lesson.id.abs() % 3];
           return InkWell(
             onTap: () => onLesson(lesson),
@@ -1084,13 +1067,8 @@ class _AiInsightCard extends StatelessWidget {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          theme.colorScheme.primary,
-                          const Color(0xFFE16D96),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(14),
+                      color: theme.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
                       Icons.auto_awesome_rounded,

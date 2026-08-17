@@ -19,6 +19,8 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
+  int _unreadNotifications = 0;
+  bool _notificationCountRequested = false;
   final Set<_ShellPage> _visitedPages = {_ShellPage.home};
 
   void _selectPage(_ShellPage page) {
@@ -27,6 +29,9 @@ class _AppShellState extends State<AppShell> {
       _index = _pages.indexOf(page);
       _visitedPages.add(page);
     });
+    if (page == _ShellPage.home || page == _ShellPage.work) {
+      _refreshUnreadNotifications();
+    }
   }
 
   late List<_ShellPage> _pages;
@@ -62,6 +67,43 @@ class _AppShellState extends State<AppShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) showPremiumToast(context, context.tr('warmLogin'));
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_notificationCountRequested) return;
+    _notificationCountRequested = true;
+    _refreshUnreadNotifications();
+  }
+
+  Future<void> _refreshUnreadNotifications() async {
+    final controller = AppControllerScope.of(context);
+    if (!controller.can('notifications:read')) return;
+    try {
+      final count = await controller.loadUnreadNotificationCount();
+      if (mounted && count != _unreadNotifications) {
+        setState(() => _unreadNotifications = count);
+      }
+    } catch (_) {
+      // A badge is supporting context; page-level loading and recovery remain
+      // available if the count endpoint is temporarily unavailable.
+    }
+  }
+
+  Widget _destinationIcon(
+    _ShellDestination destination, {
+    required bool selected,
+  }) {
+    final icon = Icon(selected ? destination.selectedIcon : destination.icon);
+    if (destination.page != _ShellPage.home || _unreadNotifications <= 0) {
+      return icon;
+    }
+    return Badge.count(
+      count: _unreadNotifications,
+      isLabelVisible: true,
+      child: icon,
+    );
   }
 
   @override
@@ -153,43 +195,42 @@ class _AppShellState extends State<AppShell> {
               children: [
                 SafeArea(
                   right: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 12, 0, 12),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(26),
-                        border: Border.all(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.outlineVariant.withValues(alpha: .4),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      border: BorderDirectional(
+                        end: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant,
                         ),
                       ),
-                      child: NavigationRail(
-                        selectedIndex: _index,
-                        onDestinationSelected: (index) =>
-                            _selectPage(_pages[index]),
-                        backgroundColor: Colors.transparent,
-                        indicatorShape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        labelType: constraints.maxWidth >= 1050
-                            ? NavigationRailLabelType.all
-                            : NavigationRailLabelType.selected,
-                        leading: const Padding(
-                          padding: EdgeInsets.only(top: 8, bottom: 20),
-                          child: StarforgeMark(),
-                        ),
-                        destinations: destinations
-                            .map(
-                              (destination) => NavigationRailDestination(
-                                icon: Icon(destination.icon),
-                                selectedIcon: Icon(destination.selectedIcon),
-                                label: Text(destination.label),
+                    ),
+                    child: NavigationRail(
+                      selectedIndex: _index,
+                      onDestinationSelected: (index) =>
+                          _selectPage(_pages[index]),
+                      backgroundColor: Colors.transparent,
+                      labelType: constraints.maxWidth >= 1050
+                          ? NavigationRailLabelType.all
+                          : NavigationRailLabelType.selected,
+                      leading: const Padding(
+                        padding: EdgeInsets.only(top: 16, bottom: 24),
+                        child: StarforgeMark(size: 40),
+                      ),
+                      destinations: destinations
+                          .map(
+                            (destination) => NavigationRailDestination(
+                              icon: _destinationIcon(
+                                destination,
+                                selected: false,
                               ),
-                            )
-                            .toList(),
-                      ),
+                              selectedIcon: _destinationIcon(
+                                destination,
+                                selected: true,
+                              ),
+                              label: Text(destination.label),
+                            ),
+                          )
+                          .toList(),
                     ),
                   ),
                 ),
@@ -206,8 +247,8 @@ class _AppShellState extends State<AppShell> {
             destinations: destinations
                 .map(
                   (destination) => NavigationDestination(
-                    icon: Icon(destination.icon),
-                    selectedIcon: Icon(destination.selectedIcon),
+                    icon: _destinationIcon(destination, selected: false),
+                    selectedIcon: _destinationIcon(destination, selected: true),
                     label: destination.label,
                   ),
                 )

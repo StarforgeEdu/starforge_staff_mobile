@@ -304,6 +304,12 @@ abstract interface class StudentLeadershipGateway {
   Future<StudentLeadershipInfo> studentLeadershipProfile(int studentId);
 }
 
+/// Invitee RSVP is authenticated and exact-principal scoped by the service;
+/// it intentionally does not require the manager-only meeting write grant.
+abstract interface class MeetingResponseGateway {
+  Future<MeetingInfo> respondToMeeting(int meetingId, String response);
+}
+
 /// Optional because older deployments may not yet expose the derived cycle
 /// read model. The UI remains truthful and simply omits unknown progress.
 abstract interface class CohortCycleProgressGateway {
@@ -394,6 +400,7 @@ class RemoteStarforgeGateway
         CohortCycleProgressGateway,
         CohortTeachingProgressGateway,
         StudentLeadershipGateway,
+        MeetingResponseGateway,
         StaffWorkflowGateway,
         BranchTransferGateway,
         SessionExpirySource {
@@ -1591,6 +1598,16 @@ class RemoteStarforgeGateway
   Future<List<MeetingInfo>> upcomingMeetings() async {
     final items = await _getAll('/api/v1/meetings/upcoming/');
     return items.map(MeetingInfo.fromJson).toList(growable: false);
+  }
+
+  @override
+  Future<MeetingInfo> respondToMeeting(int meetingId, String response) async {
+    final payload = await _request(
+      'POST',
+      '/api/v1/meetings/$meetingId/respond/',
+      body: {'response': response},
+    );
+    return MeetingInfo.fromJson(_map(payload));
   }
 
   @override

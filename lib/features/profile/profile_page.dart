@@ -376,29 +376,21 @@ class _ProfileHero extends StatelessWidget {
     final primary = theme.colorScheme.primary;
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: primary.withValues(alpha: .2),
-            blurRadius: 34,
-            offset: const Offset(0, 14),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(16),
         child: Stack(
           children: [
             Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [primary, const Color(0xFF292B59)],
-                  ),
-                ),
-              ),
+              child: DecoratedBox(decoration: BoxDecoration(color: primary)),
             ),
             Positioned(
               right: -54,

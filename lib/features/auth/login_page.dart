@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -106,15 +104,8 @@ class _LoginPageState extends State<LoginPage>
               width: 76,
               height: 76,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.primaryContainer,
-                    Theme.of(
-                      context,
-                    ).colorScheme.tertiaryContainer.withValues(alpha: .75),
-                  ],
-                ),
-                shape: BoxShape.circle,
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 Icons.key_rounded,
@@ -266,15 +257,8 @@ class _LoginPageState extends State<LoginPage>
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _darkSystemUiStyle,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0D0E1B),
-        body: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF17172B), Color(0xFF0C1720)],
-            ),
-          ),
+        backgroundColor: AppTheme.darkCanvas,
+        body: StarfieldBackdrop(
           child: SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -298,7 +282,6 @@ class _LoginPageState extends State<LoginPage>
                     ),
                     Center(
                       child: SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
                         padding: EdgeInsets.fromLTRB(
                           isWide ? 54 : 20,
                           isCompactHeight ? 64 : 84,
@@ -397,57 +380,15 @@ class _LoginStory extends StatelessWidget {
           ? CrossAxisAlignment.center
           : CrossAxisAlignment.start,
       children: [
-        Container(
-          width: compact ? 78 : 104,
-          height: compact ? 78 : 104,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(compact ? 27 : 35),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF9A8EFF), Color(0xFF5B51D6)],
-            ),
-            border: Border.all(color: Colors.white.withValues(alpha: .3)),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF7B70FA).withValues(alpha: .28),
-                blurRadius: 32,
-                spreadRadius: 1,
-              ),
-            ],
-          ),
-          child: Icon(
-            Icons.auto_awesome_rounded,
-            color: Colors.white,
-            size: compact ? 39 : 52,
-          ),
-        ),
+        StarforgeMark(size: compact ? 68 : 92, onDark: true),
         SizedBox(height: compact ? 20 : 34),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: .08),
-            borderRadius: BorderRadius.circular(99),
-            border: Border.all(color: Colors.white.withValues(alpha: .11)),
-          ),
-          child: Text(
-            context.tr('loginEyebrow'),
-            style: const TextStyle(
-              color: Color(0xFFBDB7FF),
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.35,
-            ),
-          ),
-        ),
-        SizedBox(height: compact ? 14 : 20),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 610),
           child: Text(
             context.tr('loginPromise'),
             textAlign: compact ? TextAlign.center : TextAlign.start,
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
-              color: Colors.white,
+              color: const Color(0xFFF4E9D3),
               fontSize: compact ? 34 : 54,
               height: 1.02,
               letterSpacing: -1.8,
@@ -463,7 +404,7 @@ class _LoginStory extends StatelessWidget {
             maxLines: compact ? 2 : 3,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.white.withValues(alpha: .64),
+              color: const Color(0xFFC5B79C),
               height: 1.55,
               fontSize: compact ? 14 : 17,
             ),
@@ -502,20 +443,20 @@ class _GlassLoginCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fieldBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(18),
-      borderSide: BorderSide(color: Colors.white.withValues(alpha: .1)),
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: Color(0xFF493E30)),
     );
     return Container(
       padding: const EdgeInsets.fromLTRB(26, 28, 26, 22),
       decoration: BoxDecoration(
-        color: const Color(0xFF17182B).withValues(alpha: .92),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withValues(alpha: .12)),
+        color: const Color(0xFF1D1914),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF493E30)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: .25),
-            blurRadius: 32,
-            offset: const Offset(0, 18),
+            color: Colors.black.withValues(alpha: .28),
+            blurRadius: 28,
+            offset: const Offset(0, 14),
           ),
         ],
       ),
@@ -528,7 +469,7 @@ class _GlassLoginCard extends StatelessWidget {
               Text(
                 context.tr('welcomeBack'),
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
+                  color: const Color(0xFFF4E9D3),
                   letterSpacing: -.8,
                 ),
               ),
@@ -536,7 +477,7 @@ class _GlassLoginCard extends StatelessWidget {
               Text(
                 context.tr('loginSubtitle'),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: .58),
+                  color: const Color(0xFFC5B79C),
                 ),
               ),
               const SizedBox(height: 26),
@@ -570,7 +511,7 @@ class _GlassLoginCard extends StatelessWidget {
                     obscurePassword
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
-                    color: Colors.white.withValues(alpha: .55),
+                    color: const Color(0xFFC5B79C),
                   ),
                 ),
                 validator: (value) => value == null || value.isEmpty
@@ -582,7 +523,7 @@ class _GlassLoginCard extends StatelessWidget {
                 child: TextButton(
                   onPressed: submitting ? null : onForgot,
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFFC6C1FF),
+                    foregroundColor: const Color(0xFFE4815B),
                     visualDensity: VisualDensity.compact,
                   ),
                   child: Text(context.tr('forgotPassword')),
@@ -645,7 +586,7 @@ class _GlassLoginCard extends StatelessWidget {
                   icon: const Icon(Icons.shield_outlined, size: 17),
                   label: Text(context.tr('privacyPolicy')),
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.white.withValues(alpha: .56),
+                    foregroundColor: const Color(0xFFC5B79C),
                     textStyle: const TextStyle(fontSize: 12),
                   ),
                 ),
@@ -700,27 +641,27 @@ class _DarkField extends StatelessWidget {
     autocorrect: false,
     enableSuggestions: !obscureText,
     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-    cursorColor: const Color(0xFFAAA3FF),
+    cursorColor: const Color(0xFFE4815B),
     decoration: InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: Colors.white.withValues(alpha: .55)),
-      floatingLabelStyle: const TextStyle(color: Color(0xFFC5C0FF)),
-      prefixIcon: Icon(icon, color: Colors.white.withValues(alpha: .55)),
+      labelStyle: const TextStyle(color: Color(0xFFC5B79C)),
+      floatingLabelStyle: const TextStyle(color: Color(0xFFE4815B)),
+      prefixIcon: Icon(icon, color: const Color(0xFFC5B79C)),
       suffixIcon: suffix,
       filled: true,
-      fillColor: Colors.black.withValues(alpha: .16),
+      fillColor: const Color(0xFF241E18),
       border: border,
       enabledBorder: border,
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Color(0xFF958CFF), width: 1.5),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFFE4815B), width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: AppTheme.coral),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: AppTheme.coral, width: 1.5),
       ),
       errorStyle: const TextStyle(color: Color(0xFFFFB2AF)),
@@ -742,25 +683,23 @@ class _GradientLoginButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: onPressed == null
-            ? const [Color(0xFF4A486B), Color(0xFF49475F)]
-            : const [Color(0xFF8E83FF), Color(0xFF5E55D8)],
-      ),
-      borderRadius: BorderRadius.circular(18),
+      color: onPressed == null
+          ? const Color(0xFF493E30)
+          : const Color(0xFFE4815B),
+      borderRadius: BorderRadius.circular(14),
       boxShadow: onPressed == null
           ? null
           : [
               BoxShadow(
-                color: const Color(0xFF766BEC).withValues(alpha: .34),
-                blurRadius: 24,
-                offset: const Offset(0, 11),
+                color: Colors.black.withValues(alpha: .24),
+                blurRadius: 20,
+                offset: const Offset(0, 9),
               ),
             ],
     ),
     child: Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(14),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
@@ -881,13 +820,13 @@ class _LanguageRow extends StatelessWidget {
         height: 28,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: const Color(0xFF8C82FF).withValues(alpha: .18),
+          color: Theme.of(context).colorScheme.secondaryContainer,
           borderRadius: BorderRadius.circular(9),
         ),
         child: Text(
           code,
-          style: const TextStyle(
-            color: Color(0xFFC9C4FF),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSecondaryContainer,
             fontSize: 11,
             fontWeight: FontWeight.w800,
           ),
@@ -966,157 +905,143 @@ class _RequiredPasswordPageState extends State<RequiredPasswordPage> {
                     children: [
                       const StarforgeMark(onDark: true, showWordmark: true),
                       const SizedBox(height: 28),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                          child: Container(
-                            padding: const EdgeInsets.all(26),
-                            decoration: BoxDecoration(
-                              color: const Color(
-                                0xFF1A1B31,
-                              ).withValues(alpha: .86),
-                              borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: .12),
+                      Container(
+                        padding: const EdgeInsets.all(26),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1D1914),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: const Color(0xFF493E30)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 58,
+                              height: 58,
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFFE4815B,
+                                ).withValues(alpha: .16),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(
+                                Icons.lock_reset_rounded,
+                                color: Color(0xFFE4815B),
+                                size: 30,
                               ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 58,
-                                  height: 58,
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                      0xFF8D83FF,
-                                    ).withValues(alpha: .16),
-                                    borderRadius: BorderRadius.circular(19),
-                                  ),
-                                  child: const Icon(
-                                    Icons.lock_reset_rounded,
-                                    color: Color(0xFFBEB8FF),
-                                    size: 30,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                Text(
-                                  context.tr('passwordRequiredTitle'),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium
-                                      ?.copyWith(color: Colors.white),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  context.tr('passwordRequiredBody'),
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: .62),
-                                    height: 1.45,
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                                for (final field in [
-                                  (
-                                    _current,
-                                    'currentPassword',
-                                    _obscureCurrent,
-                                    () => setState(
-                                      () => _obscureCurrent = !_obscureCurrent,
-                                    ),
-                                  ),
-                                  (
-                                    _next,
-                                    'newPassword',
-                                    _obscureNext,
-                                    () => setState(
-                                      () => _obscureNext = !_obscureNext,
-                                    ),
-                                  ),
-                                  (
-                                    _confirm,
-                                    'confirmPassword',
-                                    _obscureConfirm,
-                                    () => setState(
-                                      () => _obscureConfirm = !_obscureConfirm,
-                                    ),
-                                  ),
-                                ]) ...[
-                                  TextField(
-                                    controller: field.$1,
-                                    obscureText: field.$3,
-                                    autocorrect: false,
-                                    enableSuggestions: false,
-                                    keyboardType: TextInputType.visiblePassword,
-                                    autofillHints: field.$1 == _current
-                                        ? const [AutofillHints.password]
-                                        : const [AutofillHints.newPassword],
-                                    style: const TextStyle(color: Colors.white),
-                                    decoration: InputDecoration(
-                                      labelText: context.tr(field.$2),
-                                      labelStyle: const TextStyle(
-                                        color: Colors.white54,
-                                      ),
-                                      fillColor: Colors.black.withValues(
-                                        alpha: .16,
-                                      ),
-                                      suffixIcon: IconButton(
-                                        onPressed: field.$4,
-                                        tooltip: context.tr(
-                                          field.$3
-                                              ? 'showPassword'
-                                              : 'hidePassword',
-                                        ),
-                                        icon: Icon(
-                                          field.$3
-                                              ? Icons.visibility_outlined
-                                              : Icons.visibility_off_outlined,
-                                          color: Colors.white54,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                ],
-                                Text(
-                                  _error ?? context.tr('passwordRules'),
-                                  style: TextStyle(
-                                    color: _error == null
-                                        ? Colors.white54
-                                        : const Color(0xFFFFAAA6),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 18),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: FilledButton(
-                                    onPressed: _busy ? null : _save,
-                                    child: _busy
-                                        ? const SizedBox(
-                                            width: 22,
-                                            height: 22,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2.2,
-                                            ),
-                                          )
-                                        : Text(context.tr('updatePassword')),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Center(
-                                  child: TextButton(
-                                    onPressed: _busy
-                                        ? null
-                                        : () => AppControllerScope.of(
-                                            context,
-                                          ).signOut(),
-                                    child: Text(context.tr('signOut')),
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(height: 20),
+                            Text(
+                              context.tr('passwordRequiredTitle'),
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(color: const Color(0xFFF4E9D3)),
                             ),
-                          ),
+                            const SizedBox(height: 8),
+                            Text(
+                              context.tr('passwordRequiredBody'),
+                              style: TextStyle(
+                                color: const Color(0xFFC5B79C),
+                                height: 1.45,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            for (final field in [
+                              (
+                                _current,
+                                'currentPassword',
+                                _obscureCurrent,
+                                () => setState(
+                                  () => _obscureCurrent = !_obscureCurrent,
+                                ),
+                              ),
+                              (
+                                _next,
+                                'newPassword',
+                                _obscureNext,
+                                () => setState(
+                                  () => _obscureNext = !_obscureNext,
+                                ),
+                              ),
+                              (
+                                _confirm,
+                                'confirmPassword',
+                                _obscureConfirm,
+                                () => setState(
+                                  () => _obscureConfirm = !_obscureConfirm,
+                                ),
+                              ),
+                            ]) ...[
+                              TextField(
+                                controller: field.$1,
+                                obscureText: field.$3,
+                                autocorrect: false,
+                                enableSuggestions: false,
+                                keyboardType: TextInputType.visiblePassword,
+                                autofillHints: field.$1 == _current
+                                    ? const [AutofillHints.password]
+                                    : const [AutofillHints.newPassword],
+                                style: const TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  labelText: context.tr(field.$2),
+                                  labelStyle: const TextStyle(
+                                    color: Color(0xFFC5B79C),
+                                  ),
+                                  fillColor: const Color(0xFF241E18),
+                                  suffixIcon: IconButton(
+                                    onPressed: field.$4,
+                                    tooltip: context.tr(
+                                      field.$3
+                                          ? 'showPassword'
+                                          : 'hidePassword',
+                                    ),
+                                    icon: Icon(
+                                      field.$3
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                      color: const Color(0xFFC5B79C),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                            Text(
+                              _error ?? context.tr('passwordRules'),
+                              style: TextStyle(
+                                color: _error == null
+                                    ? const Color(0xFFC5B79C)
+                                    : const Color(0xFFFFAAA6),
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                onPressed: _busy ? null : _save,
+                                child: _busy
+                                    ? const SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.2,
+                                        ),
+                                      )
+                                    : Text(context.tr('updatePassword')),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Center(
+                              child: TextButton(
+                                onPressed: _busy
+                                    ? null
+                                    : () => AppControllerScope.of(
+                                        context,
+                                      ).signOut(),
+                                child: Text(context.tr('signOut')),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

@@ -886,13 +886,13 @@ class _ConversationPageState extends State<ConversationPage>
                 _AttachmentAction(
                   icon: Icons.camera_alt_outlined,
                   label: context.tr('camera'),
-                  color: const Color(0xFF6C63E8),
+                  color: Theme.of(context).colorScheme.primary,
                   onTap: () => _pickImage(ImageSource.camera),
                 ),
                 _AttachmentAction(
                   icon: Icons.photo_library_outlined,
                   label: context.tr('gallery'),
-                  color: const Color(0xFFE06B83),
+                  color: AppTheme.gold,
                   onTap: () => _pickImage(ImageSource.gallery),
                 ),
                 _AttachmentAction(
@@ -904,7 +904,7 @@ class _ConversationPageState extends State<ConversationPage>
                 _AttachmentAction(
                   icon: Icons.audio_file_outlined,
                   label: context.tr('audio'),
-                  color: const Color(0xFF3976B8),
+                  color: const Color(0xFF2A3D8F),
                   onTap: _pickAudio,
                 ),
                 _AttachmentAction(
@@ -1385,14 +1385,14 @@ class _MessageBubble extends StatelessWidget {
                   ? Image.network(
                       message.attachmentUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _mediaPlaceholder(),
+                      errorBuilder: (_, _, _) => _mediaPlaceholder(context),
                     )
                   : Stack(
                       fit: StackFit.expand,
                       children: [
                         if (message.attachmentUrl.isNotEmpty)
                           ColoredBox(
-                            color: const Color(0xFF30315C),
+                            color: Theme.of(context).colorScheme.primary,
                             child: const Icon(
                               Icons.movie_outlined,
                               color: Colors.white30,
@@ -1400,7 +1400,7 @@ class _MessageBubble extends StatelessWidget {
                             ),
                           )
                         else
-                          _mediaPlaceholder(),
+                          _mediaPlaceholder(context),
                         if (message.type == MessageType.video)
                           Center(
                             child: _AttachmentPlayIcon(
@@ -1478,11 +1478,9 @@ class _MessageBubble extends StatelessWidget {
     );
   }
 
-  Widget _mediaPlaceholder() => const DecoratedBox(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(colors: [Color(0xFF8178E8), Color(0xFFE1849A)]),
-    ),
-    child: Center(
+  Widget _mediaPlaceholder(BuildContext context) => ColoredBox(
+    color: Theme.of(context).colorScheme.primary,
+    child: const Center(
       child: Icon(Icons.image_rounded, color: Colors.white, size: 42),
     ),
   );
@@ -1846,13 +1844,8 @@ class _AudioAttachmentPageState extends State<_AudioAttachmentPage> {
                   width: 112,
                   height: 112,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Theme.of(context).colorScheme.primary,
-                        AppTheme.coral,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(31),
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Icon(
                     Icons.graphic_eq_rounded,

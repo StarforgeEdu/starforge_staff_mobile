@@ -115,14 +115,14 @@ class _StaffFormsPageState extends State<StaffFormsPage> {
                               width: 50,
                               height: 50,
                               decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFF8C5CC4,
-                                ).withValues(alpha: .12),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primaryContainer,
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.ballot_outlined,
-                                color: Color(0xFF8C5CC4),
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                             const SizedBox(width: 14),

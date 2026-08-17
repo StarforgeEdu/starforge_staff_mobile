@@ -1444,18 +1444,28 @@ class MeetingInfo {
     required this.endsAt,
     required this.location,
     required this.status,
+    this.response = 'pending',
   });
 
-  factory MeetingInfo.fromJson(Map<String, dynamic> json) => MeetingInfo(
-    id: jsonRequiredPositiveInt(json['id'], 'meeting.id'),
-    title: jsonString(json['title']),
-    agenda: jsonString(json['agenda']),
-    branchName: jsonString(json['branch_name']),
-    startsAt: jsonRequiredDate(json['starts_at'], 'meeting.starts_at'),
-    endsAt: jsonRequiredDate(json['ends_at'], 'meeting.ends_at'),
-    location: jsonString(json['location']),
-    status: jsonString(json['status']),
-  );
+  factory MeetingInfo.fromJson(Map<String, dynamic> json) {
+    final attendees = json['attendees'];
+    final ownAttendee = attendees is List && attendees.isNotEmpty
+        ? attendees.first
+        : null;
+    return MeetingInfo(
+      id: jsonRequiredPositiveInt(json['id'], 'meeting.id'),
+      title: jsonString(json['title']),
+      agenda: jsonString(json['agenda']),
+      branchName: jsonString(json['branch_name']),
+      startsAt: jsonRequiredDate(json['starts_at'], 'meeting.starts_at'),
+      endsAt: jsonRequiredDate(json['ends_at'], 'meeting.ends_at'),
+      location: jsonString(json['location']),
+      status: jsonString(json['status']),
+      response: ownAttendee is Map
+          ? jsonString(ownAttendee['response'], 'pending')
+          : 'pending',
+    );
+  }
 
   final int id;
   final String title;
@@ -1465,6 +1475,7 @@ class MeetingInfo {
   final DateTime endsAt;
   final String location;
   final String status;
+  final String response;
 
   Map<String, dynamic> toDashboardMap() => {
     'id': id,

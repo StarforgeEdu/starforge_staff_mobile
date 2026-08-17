@@ -1,4 +1,4 @@
-# cardio_learn
+# Starforge Staff Mobile
 
 Starforge Staff is the Flutter mobile workspace for education-center employees. It ships one permission-aware Android/iOS client for teachers, teaching assistants, media staff, reception, admissions/sales, print operators, cashiers, and other staff memberships exposed by Starforge Edu.
 

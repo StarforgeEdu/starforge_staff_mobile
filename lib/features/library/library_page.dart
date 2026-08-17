@@ -632,19 +632,8 @@ class _FeaturedPlayer extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [resource.color, const Color(0xFF2F315B)],
-        ),
-        borderRadius: BorderRadius.circular(27),
-        boxShadow: [
-          BoxShadow(
-            color: resource.color.withValues(alpha: .2),
-            blurRadius: 28,
-            offset: const Offset(0, 13),
-          ),
-        ],
+        color: resource.color,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
@@ -776,15 +765,8 @@ class _ResourceCard extends StatelessWidget {
                 width: constraints.maxWidth < 300 ? 64 : 76,
                 height: double.infinity,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      resource.color,
-                      resource.color.withValues(alpha: .7),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(17),
+                  color: resource.color,
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(resource.icon, color: Colors.white, size: 31),
               ),
@@ -1191,7 +1173,7 @@ class _LibraryViewerPageState extends State<LibraryViewerPage> {
                         ? context.tr('starforgeLibrary')
                         : resource.author,
                     style: const TextStyle(
-                      color: Color(0xFF6559D5),
+                      color: Color(0xFFB85535),
                       fontWeight: FontWeight.w800,
                       letterSpacing: .6,
                     ),
@@ -1357,17 +1339,8 @@ class _LibraryViewerPageState extends State<LibraryViewerPage> {
                     width: 172,
                     height: 172,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [_resource.color, const Color(0xFF30315C)],
-                      ),
-                      borderRadius: BorderRadius.circular(35),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _resource.color.withValues(alpha: .24),
-                          blurRadius: 34,
-                          offset: const Offset(0, 15),
-                        ),
-                      ],
+                      color: _resource.color,
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Icon(
                       Icons.graphic_eq_rounded,
@@ -1472,19 +1445,8 @@ class _LibraryViewerPageState extends State<LibraryViewerPage> {
                 width: 210,
                 height: 210,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [resource.color, const Color(0xFF30315C)],
-                  ),
-                  borderRadius: BorderRadius.circular(34),
-                  boxShadow: [
-                    BoxShadow(
-                      color: resource.color.withValues(alpha: .25),
-                      blurRadius: 40,
-                      offset: const Offset(0, 18),
-                    ),
-                  ],
+                  color: resource.color,
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Icon(resource.icon, color: Colors.white, size: 78),
               ),

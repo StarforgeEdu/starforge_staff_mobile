@@ -59,16 +59,11 @@ class _AppEntry extends StatelessWidget {
     if (reduceMotion) return child;
 
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 550),
+      duration: const Duration(milliseconds: 220),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
-      transitionBuilder: (child, animation) => FadeTransition(
-        opacity: animation,
-        child: ScaleTransition(
-          scale: Tween(begin: .985, end: 1.0).animate(animation),
-          child: child,
-        ),
-      ),
+      transitionBuilder: (child, animation) =>
+          FadeTransition(opacity: animation, child: child),
       child: child,
     );
   }

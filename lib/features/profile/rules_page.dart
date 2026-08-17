@@ -93,13 +93,8 @@ class _RulesPageState extends State<RulesPage> {
     child: Container(
       padding: const EdgeInsets.all(21),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).colorScheme.primary,
-            const Color(0xFF373870),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(26),
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
