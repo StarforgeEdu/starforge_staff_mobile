@@ -456,7 +456,7 @@ class _ConversationTile extends StatelessWidget {
                           '${contact.unread}',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.w800,
                           ),
                         ),

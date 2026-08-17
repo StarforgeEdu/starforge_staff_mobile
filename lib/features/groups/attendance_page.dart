@@ -949,7 +949,7 @@ class _MonthCalendar extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 10,
+                    fontSize: 11,
                   ),
                 ),
               );
@@ -1191,7 +1191,7 @@ class _LessonHistoryRow extends StatelessWidget {
                   ).format(lesson.startsAt.toLocal()).toUpperCase(),
                   style: Theme.of(
                     context,
-                  ).textTheme.labelSmall?.copyWith(fontSize: 9),
+                  ).textTheme.labelSmall?.copyWith(fontSize: 11),
                 ),
               ],
             ),
@@ -1314,7 +1314,7 @@ class _TinyCount extends StatelessWidget {
               '$value',
               style: TextStyle(
                 color: color,
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w800,
               ),
             ),

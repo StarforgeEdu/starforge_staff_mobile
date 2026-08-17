@@ -1362,7 +1362,7 @@ class _MessageBubble extends StatelessWidget {
             message.duration ?? message.time,
             style: TextStyle(
               color: foreground.withValues(alpha: .72),
-              fontSize: 10,
+              fontSize: 11,
             ),
           ),
           _messageStatus(foreground),
@@ -1422,7 +1422,7 @@ class _MessageBubble extends StatelessWidget {
               children: [
                 Text(
                   message.time,
-                  style: const TextStyle(color: Colors.white70, fontSize: 9),
+                  style: const TextStyle(color: Colors.white70, fontSize: 11),
                 ),
                 _messageStatus(Colors.white),
               ],
@@ -1453,7 +1453,7 @@ class _MessageBubble extends StatelessWidget {
             message.time,
             style: TextStyle(
               color: foreground.withValues(alpha: .65),
-              fontSize: 9,
+              fontSize: 11,
             ),
           ),
           _messageStatus(foreground),
@@ -1470,7 +1470,7 @@ class _MessageBubble extends StatelessWidget {
           message.time,
           style: TextStyle(
             color: foreground.withValues(alpha: .65),
-            fontSize: 9,
+            fontSize: 11,
           ),
         ),
         _messageStatus(foreground),

@@ -138,6 +138,10 @@ abstract final class AppTheme {
         letterSpacing: .05,
       ),
       labelMedium: baseText.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+      labelSmall: baseText.labelSmall?.copyWith(
+        fontWeight: FontWeight.w600,
+        height: 1.25,
+      ),
     );
     final inputShape = OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
@@ -165,7 +169,10 @@ abstract final class AppTheme {
         elevation: 0,
         color: surface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: border.withValues(alpha: .9)),
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -194,6 +201,9 @@ abstract final class AppTheme {
         style: FilledButton.styleFrom(
           minimumSize: const Size(0, 52),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          elevation: 0,
+          disabledBackgroundColor: scheme.surfaceContainerHighest,
+          disabledForegroundColor: muted,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -230,6 +240,13 @@ abstract final class AppTheme {
         ),
       ),
       dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),
+      listTileTheme: ListTileThemeData(
+        minTileHeight: 54,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        iconColor: muted,
+        textColor: onSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: surface,
         surfaceTintColor: Colors.transparent,
@@ -252,8 +269,28 @@ abstract final class AppTheme {
         indicatorShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
         ),
-        labelTextStyle: WidgetStatePropertyAll(
-          textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w700),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          return textTheme.labelSmall?.copyWith(
+            color: states.contains(WidgetState.selected) ? primary : muted,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w800
+                : FontWeight.w600,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          return IconThemeData(
+            color: states.contains(WidgetState.selected) ? primary : muted,
+            size: states.contains(WidgetState.selected) ? 25 : 24,
+          );
+        }),
+      ),
+      badgeTheme: BadgeThemeData(
+        backgroundColor: scheme.error,
+        textColor: scheme.onError,
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        textStyle: textTheme.labelSmall?.copyWith(
+          color: scheme.onError,
+          fontWeight: FontWeight.w800,
         ),
       ),
       navigationRailTheme: NavigationRailThemeData(
@@ -270,6 +307,60 @@ abstract final class AppTheme {
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primary,
         linearTrackColor: border.withValues(alpha: .5),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        side: BorderSide(color: scheme.outline, width: 1.4),
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? primary : null,
+        ),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected) ? primary : scheme.outline,
+        ),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? scheme.onPrimary
+              : scheme.onSurfaceVariant,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? primary
+              : scheme.surfaceContainerHighest,
+        ),
+        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: scheme.inverseSurface,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        textStyle: textTheme.labelMedium?.copyWith(
+          color: scheme.onInverseSurface,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+        waitDuration: const Duration(milliseconds: 500),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 8,
+        shadowColor: scheme.shadow.withValues(alpha: .16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: border),
+        ),
+      ),
+      scrollbarTheme: ScrollbarThemeData(
+        radius: const Radius.circular(99),
+        thickness: const WidgetStatePropertyAll(4),
+        thumbColor: WidgetStatePropertyAll(
+          muted.withValues(alpha: isDark ? .58 : .38),
+        ),
       ),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(

@@ -120,17 +120,89 @@ class PremiumCard extends StatelessWidget {
           border ??
           BorderSide(color: scheme.outlineVariant.withValues(alpha: .88)),
     );
-    return Material(
-      color: color ?? scheme.surface,
-      shape: shape,
-      clipBehavior: Clip.antiAlias,
-      child: onTap == null
-          ? Padding(padding: padding, child: child)
-          : InkWell(
-              onTap: onTap,
-              customBorder: shape,
-              child: Padding(padding: padding, child: child),
-            ),
+    final shadow = BoxShadow(
+      color: scheme.shadow.withValues(
+        alpha: Theme.of(context).brightness == Brightness.dark ? .16 : .045,
+      ),
+      blurRadius: 14,
+      offset: const Offset(0, 5),
+    );
+    if (onTap != null) {
+      return _PressableCardSurface(
+        onTap: onTap!,
+        shape: shape,
+        color: color ?? scheme.surface,
+        shadow: shadow,
+        child: Padding(padding: padding, child: child),
+      );
+    }
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: [shadow],
+      ),
+      child: Material(
+        color: color ?? scheme.surface,
+        shape: shape,
+        clipBehavior: Clip.antiAlias,
+        child: Padding(padding: padding, child: child),
+      ),
+    );
+  }
+}
+
+class _PressableCardSurface extends StatefulWidget {
+  const _PressableCardSurface({
+    required this.child,
+    required this.onTap,
+    required this.shape,
+    required this.color,
+    required this.shadow,
+  });
+
+  final Widget child;
+  final VoidCallback onTap;
+  final ShapeBorder shape;
+  final Color color;
+  final BoxShadow shadow;
+
+  @override
+  State<_PressableCardSurface> createState() => _PressableCardSurfaceState();
+}
+
+class _PressableCardSurfaceState extends State<_PressableCardSurface> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    return AnimatedScale(
+      scale: reduceMotion || !_pressed ? 1 : .96,
+      duration: reduceMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 110),
+      curve: Curves.easeOutCubic,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: widget.shape is RoundedRectangleBorder
+              ? (widget.shape as RoundedRectangleBorder).borderRadius
+              : null,
+          boxShadow: [widget.shadow],
+        ),
+        child: Material(
+          color: widget.color,
+          shape: widget.shape,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: widget.onTap,
+            onHighlightChanged: (value) {
+              if (_pressed != value) setState(() => _pressed = value);
+            },
+            customBorder: widget.shape,
+            child: widget.child,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -152,29 +224,43 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+    final copy = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
+        Text(title, style: theme.textTheme.titleLarge),
+        if (subtitle != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            subtitle!,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ],
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stackAction = action != null && constraints.maxWidth < 340;
+        if (stackAction) {
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: theme.textTheme.titleLarge),
-              if (subtitle != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  subtitle!,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
+              copy,
+              const SizedBox(height: 8),
+              TextButton(onPressed: onAction, child: Text(action!)),
             ],
-          ),
-        ),
-        if (action != null)
-          TextButton(onPressed: onAction, child: Text(action!)),
-      ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(child: copy),
+            if (action != null)
+              TextButton(onPressed: onAction, child: Text(action!)),
+          ],
+        );
+      },
     );
   }
 }
@@ -391,28 +477,38 @@ class PageIntro extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+    final copy = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: theme.textTheme.headlineMedium),
-              if (subtitle != null) ...[
-                const SizedBox(height: 5),
-                Text(
-                  subtitle!,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ],
+        Text(title, style: theme.textTheme.headlineMedium),
+        if (subtitle != null) ...[
+          const SizedBox(height: 5),
+          Text(
+            subtitle!,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
-        ),
-        ?trailing,
+        ],
       ],
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stackTrailing = trailing != null && constraints.maxWidth < 340;
+        if (stackTrailing) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [copy, const SizedBox(height: 12), trailing!],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(child: copy),
+            ?trailing,
+          ],
+        );
+      },
     );
   }
 }
@@ -439,37 +535,43 @@ class EmptyState extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 76,
-              height: 76,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(16),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: .12),
+                  ),
+                ),
+                child: Icon(icon, size: 30, color: theme.colorScheme.primary),
               ),
-              child: Icon(icon, size: 34, color: theme.colorScheme.primary),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              title,
-              style: theme.textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              body,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+              const SizedBox(height: 18),
+              Text(
+                title,
+                style: theme.textTheme.titleLarge,
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            if (action != null) ...[
-              const SizedBox(height: 20),
-              OutlinedButton(onPressed: onAction, child: Text(action!)),
+              const SizedBox(height: 8),
+              Text(
+                body,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (action != null) ...[
+                const SizedBox(height: 20),
+                OutlinedButton(onPressed: onAction, child: Text(action!)),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
