@@ -206,52 +206,80 @@ class _WorkHero extends StatelessWidget {
   final int toolCount;
 
   @override
-  Widget build(BuildContext context) => PremiumCard(
-    padding: const EdgeInsets.all(22),
-    color: Theme.of(context).colorScheme.surfaceContainerLow,
-    child: Row(
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final copy = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const StarforgeMark(size: 46),
-        const SizedBox(width: 17),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.tr('workHubTitle'),
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                context.tr('workHubSubtitle'),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+        Text(
+          context.tr('workHubTitle'),
+          style: theme.textTheme.headlineSmall?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w800,
           ),
         ),
-        Container(
-          constraints: const BoxConstraints(minWidth: 42, minHeight: 42),
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            '$toolCount',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
+        const SizedBox(height: 6),
+        Text(
+          context.tr('workHubSubtitle'),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ],
-    ),
-  );
+    );
+    final count = Container(
+      constraints: const BoxConstraints(minWidth: 42, minHeight: 42),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        '$toolCount',
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: theme.colorScheme.onPrimaryContainer,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+      ),
+    );
+    return PremiumCard(
+      padding: const EdgeInsets.all(22),
+      color: theme.colorScheme.surfaceContainerLow,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final stackCopy =
+              constraints.maxWidth < 290 ||
+              MediaQuery.textScalerOf(context).scale(1) > 1.35;
+          if (stackCopy) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const StarforgeMark(size: 42),
+                    const Spacer(),
+                    count,
+                  ],
+                ),
+                const SizedBox(height: 16),
+                copy,
+              ],
+            );
+          }
+          return Row(
+            children: [
+              const StarforgeMark(size: 46),
+              const SizedBox(width: 17),
+              Expanded(child: copy),
+              const SizedBox(width: 12),
+              count,
+            ],
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _WorkSectionHeader extends StatelessWidget {
@@ -272,6 +300,7 @@ class _WorkSectionHeader extends StatelessWidget {
           '$count',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ],

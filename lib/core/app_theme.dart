@@ -280,7 +280,7 @@ abstract final class AppTheme {
         iconTheme: WidgetStateProperty.resolveWith((states) {
           return IconThemeData(
             color: states.contains(WidgetState.selected) ? primary : muted,
-            size: states.contains(WidgetState.selected) ? 25 : 24,
+            size: 24,
           );
         }),
       ),
@@ -291,6 +291,7 @@ abstract final class AppTheme {
         textStyle: textTheme.labelSmall?.copyWith(
           color: scheme.onError,
           fontWeight: FontWeight.w800,
+          fontFeatures: const [FontFeature.tabularFigures()],
         ),
       ),
       navigationRailTheme: NavigationRailThemeData(
@@ -303,6 +304,12 @@ abstract final class AppTheme {
           color: primary,
           fontWeight: FontWeight.w700,
         ),
+        unselectedLabelTextStyle: textTheme.labelMedium?.copyWith(
+          color: muted,
+          fontWeight: FontWeight.w600,
+        ),
+        selectedIconTheme: IconThemeData(color: primary, size: 24),
+        unselectedIconTheme: IconThemeData(color: muted, size: 24),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primary,

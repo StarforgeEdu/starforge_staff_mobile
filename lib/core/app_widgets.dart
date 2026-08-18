@@ -120,33 +120,19 @@ class PremiumCard extends StatelessWidget {
           border ??
           BorderSide(color: scheme.outlineVariant.withValues(alpha: .88)),
     );
-    final shadow = BoxShadow(
-      color: scheme.shadow.withValues(
-        alpha: Theme.of(context).brightness == Brightness.dark ? .16 : .045,
-      ),
-      blurRadius: 14,
-      offset: const Offset(0, 5),
-    );
     if (onTap != null) {
       return _PressableCardSurface(
         onTap: onTap!,
         shape: shape,
         color: color ?? scheme.surface,
-        shadow: shadow,
         child: Padding(padding: padding, child: child),
       );
     }
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        boxShadow: [shadow],
-      ),
-      child: Material(
-        color: color ?? scheme.surface,
-        shape: shape,
-        clipBehavior: Clip.antiAlias,
-        child: Padding(padding: padding, child: child),
-      ),
+    return Material(
+      color: color ?? scheme.surface,
+      shape: shape,
+      clipBehavior: Clip.antiAlias,
+      child: Padding(padding: padding, child: child),
     );
   }
 }
@@ -157,14 +143,12 @@ class _PressableCardSurface extends StatefulWidget {
     required this.onTap,
     required this.shape,
     required this.color,
-    required this.shadow,
   });
 
   final Widget child;
   final VoidCallback onTap;
   final ShapeBorder shape;
   final Color color;
-  final BoxShadow shadow;
 
   @override
   State<_PressableCardSurface> createState() => _PressableCardSurfaceState();
@@ -182,25 +166,17 @@ class _PressableCardSurfaceState extends State<_PressableCardSurface> {
           ? Duration.zero
           : const Duration(milliseconds: 110),
       curve: Curves.easeOutCubic,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: widget.shape is RoundedRectangleBorder
-              ? (widget.shape as RoundedRectangleBorder).borderRadius
-              : null,
-          boxShadow: [widget.shadow],
-        ),
-        child: Material(
-          color: widget.color,
-          shape: widget.shape,
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: widget.onTap,
-            onHighlightChanged: (value) {
-              if (_pressed != value) setState(() => _pressed = value);
-            },
-            customBorder: widget.shape,
-            child: widget.child,
-          ),
+      child: Material(
+        color: widget.color,
+        shape: widget.shape,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: widget.onTap,
+          onHighlightChanged: (value) {
+            if (_pressed != value) setState(() => _pressed = value);
+          },
+          customBorder: widget.shape,
+          child: widget.child,
         ),
       ),
     );
@@ -445,6 +421,7 @@ class MetricTile extends StatelessWidget {
             value,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w800,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
           const SizedBox(height: 2),

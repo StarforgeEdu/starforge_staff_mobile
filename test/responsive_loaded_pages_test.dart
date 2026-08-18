@@ -15,6 +15,7 @@ import 'package:starforge_staff/features/dashboard/notifications_page.dart';
 import 'package:starforge_staff/features/groups/groups_page.dart';
 import 'package:starforge_staff/features/library/library_page.dart';
 import 'package:starforge_staff/features/role_workspace/role_workspace_page.dart';
+import 'package:starforge_staff/features/work/work_hub_page.dart';
 import 'package:starforge_staff/services/starforge_api.dart';
 
 void main() {
@@ -205,6 +206,34 @@ void main() {
     await _scrollUntilBuilt(tester, aiMessage, step: 220, attempts: 24);
     expect(aiMessage, findsOneWidget);
     expect(find.textContaining('Group B2 responds best'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('work hub reflows on a narrow screen at 200% text', (
+    tester,
+  ) async {
+    _setViewport(tester, const Size(320, 568));
+    final controller = await _signedInController(
+      const Locale('ru'),
+      username: 'teacher',
+    );
+
+    await tester.pumpWidget(
+      _harness(
+        controller: controller,
+        locale: const Locale('ru'),
+        child: const WorkHubPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    await tester.fling(
+      find.byType(CustomScrollView),
+      const Offset(0, -1000),
+      1200,
+    );
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 
