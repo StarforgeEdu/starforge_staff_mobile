@@ -10,7 +10,15 @@ Map<String, dynamic> _jsonMap(Object? value) {
 List<String> _jsonStrings(Object? value) {
   if (value is! List) return const [];
   return value
-      .map((item) => jsonString(item).trim())
+      .map((item) {
+        if (item is Map) {
+          final option = item.cast<Object?, Object?>();
+          return jsonString(
+            option['value'] ?? option['label'] ?? option['name'] ?? option['title'],
+          ).trim();
+        }
+        return jsonString(item).trim();
+      })
       .where((item) => item.isNotEmpty)
       .toList(growable: false);
 }
