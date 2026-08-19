@@ -19,78 +19,71 @@ class StarforgeMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final foreground = onDark
-        ? const Color(0xFFFFFCF5)
-        : Theme.of(context).colorScheme.primary;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: size,
+    final brand = Theme.of(context).extension<StarforgeBrandTheme>();
+    final asset = showWordmark
+        ? onDark
+              ? 'assets/brand/logo-warm-white.png'
+              : brand?.logoAsset ?? 'assets/brand/logo-terracotta.png'
+        : onDark
+        ? 'assets/brand/symbol-warm-white.png'
+        : brand?.symbolAsset ?? 'assets/brand/symbol-terracotta.png';
+    final width = showWordmark ? size * (881.577 / 260) : size;
+    return Semantics(
+      image: true,
+      label: 'Starforge',
+      child: ExcludeSemantics(
+        child: Image.asset(
+          asset,
+          width: width,
           height: size,
-          child: CustomPaint(painter: _StarforgeMarkPainter(foreground)),
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
+          isAntiAlias: true,
         ),
-        if (showWordmark) ...[
-          const SizedBox(width: 12),
-          Text(
-            'Starforge',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: foreground,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -.3,
-            ),
-          ),
-        ],
-      ],
+      ),
     );
   }
 }
 
-Path _starPath(Rect bounds, {bool cutout = true}) {
-  Offset point(double x, double y) => Offset(
-    bounds.left + bounds.width * x / 32,
-    bounds.top + bounds.height * y / 32,
+Path _starforgeSymbolPath(Rect bounds) {
+  final scale = math.min(bounds.width / 620, bounds.height / 620);
+  final origin = Offset(
+    bounds.left + (bounds.width - 620 * scale) / 2,
+    bounds.top + (bounds.height - 620 * scale) / 2,
   );
-
-  final path = Path()
-    ..fillType = PathFillType.evenOdd
-    ..moveTo(point(16, 1).dx, point(16, 1).dy)
-    ..lineTo(point(19.4, 11.2).dx, point(19.4, 11.2).dy)
-    ..lineTo(point(29.9, 11.5).dx, point(29.9, 11.5).dy)
-    ..lineTo(point(21.3, 17.6).dx, point(21.3, 17.6).dy)
-    ..lineTo(point(24.5, 27.9).dx, point(24.5, 27.9).dy)
-    ..lineTo(point(16, 21.4).dx, point(16, 21.4).dy)
-    ..lineTo(point(7.5, 27.9).dx, point(7.5, 27.9).dy)
-    ..lineTo(point(10.7, 17.6).dx, point(10.7, 17.6).dy)
-    ..lineTo(point(2.1, 11.5).dx, point(2.1, 11.5).dy)
-    ..lineTo(point(12.6, 11.2).dx, point(12.6, 11.2).dy)
-    ..close();
-  if (cutout) {
-    final center = point(16, 16);
-    final radius = bounds.shortestSide * 2.2 / 32;
-    path.addOval(Rect.fromCircle(center: center, radius: radius));
+  Offset point(double x, double y) =>
+      Offset(origin.dx + (40 + x) * scale, origin.dy + (56.5 + y) * scale);
+  Path polygon(List<(double, double)> points) {
+    final path = Path();
+    final first = point(points.first.$1, points.first.$2);
+    path.moveTo(first.dx, first.dy);
+    for (final coordinates in points.skip(1)) {
+      final next = point(coordinates.$1, coordinates.$2);
+      path.lineTo(next.dx, next.dy);
+    }
+    return path..close();
   }
-  return path;
-}
 
-class _StarforgeMarkPainter extends CustomPainter {
-  const _StarforgeMarkPainter(this.color);
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawPath(
-      _starPath(Offset.zero & size),
-      Paint()
-        ..color = color
-        ..isAntiAlias = true,
+  return Path()
+    ..addPath(
+      polygon(const [
+        (539, .5),
+        (393.5, 302),
+        (385.5, 193),
+        (13, 504.5),
+        (334, 148.5),
+        (227.5, 145),
+      ]),
+      Offset.zero,
+    )
+    ..addPath(
+      polygon(const [(263, 187.5), (192.5, 266), (1, 364.5), (140.5, 262)]),
+      Offset.zero,
+    )
+    ..addPath(
+      polygon(const [(363.5, 249), (295, 359.5), (184.5, 506), (285, 318.5)]),
+      Offset.zero,
     );
-  }
-
-  @override
-  bool shouldRepaint(_StarforgeMarkPainter oldDelegate) =>
-      oldDelegate.color != color;
 }
 
 class PremiumCard extends StatelessWidget {
@@ -689,9 +682,8 @@ class _BrandBackdropPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final large = math.min(size.width * .72, 430.0);
     canvas.drawPath(
-      _starPath(
+      _starforgeSymbolPath(
         Rect.fromLTWH(size.width - large * .62, -large * .3, large, large),
-        cutout: false,
       ),
       Paint()
         ..color = const Color(0xFFE4815B).withValues(alpha: .10)
@@ -699,7 +691,7 @@ class _BrandBackdropPainter extends CustomPainter {
     );
     final small = math.min(size.width * .28, 150.0);
     canvas.drawPath(
-      _starPath(
+      _starforgeSymbolPath(
         Rect.fromLTWH(-small * .26, size.height - small * .78, small, small),
       ),
       Paint()

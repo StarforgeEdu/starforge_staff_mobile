@@ -31,16 +31,17 @@ abstract final class AppTheme {
   static const _darkBorder = Color(0xFF493E30);
 
   static ThemeData light(AccentChoice accent) =>
-      _theme(brightness: Brightness.light, primary: accent.color);
+      _theme(brightness: Brightness.light, accent: accent);
 
   static ThemeData dark(AccentChoice accent) =>
-      _theme(brightness: Brightness.dark, primary: accent.darkColor);
+      _theme(brightness: Brightness.dark, accent: accent);
 
   static ThemeData _theme({
     required Brightness brightness,
-    required Color primary,
+    required AccentChoice accent,
   }) {
     final isDark = brightness == Brightness.dark;
+    final primary = isDark ? accent.darkColor : accent.color;
     final background = isDark ? darkCanvas : canvas;
     final surface = isDark ? _darkSurface : _lightSurface;
     final onSurface = isDark ? _darkInk : ink;
@@ -386,9 +387,53 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       materialTapTargetSize: MaterialTapTargetSize.padded,
+      extensions: <ThemeExtension<dynamic>>[
+        StarforgeBrandTheme.forAccent(accent),
+      ],
     );
   }
 
   static Color accentForInverse(Color color) =>
       Color.lerp(color, Colors.white, .34)!;
+}
+
+@immutable
+class StarforgeBrandTheme extends ThemeExtension<StarforgeBrandTheme> {
+  const StarforgeBrandTheme({
+    required this.logoAsset,
+    required this.symbolAsset,
+  });
+
+  factory StarforgeBrandTheme.forAccent(AccentChoice accent) {
+    final asset = switch (accent) {
+      AccentChoice.indigo => 'terracotta',
+      AccentChoice.ocean => 'electric-cyan',
+      AccentChoice.coral => 'signal-indigo',
+      AccentChoice.forest => 'growth-emerald',
+      AccentChoice.azure => 'bright-azure',
+      AccentChoice.amber => 'forge-amber',
+      AccentChoice.heritage => 'deep-terracotta',
+    };
+    return StarforgeBrandTheme(
+      logoAsset: 'assets/brand/logo-$asset.png',
+      symbolAsset: 'assets/brand/symbol-$asset.png',
+    );
+  }
+
+  final String logoAsset;
+  final String symbolAsset;
+
+  @override
+  StarforgeBrandTheme copyWith({String? logoAsset, String? symbolAsset}) {
+    return StarforgeBrandTheme(
+      logoAsset: logoAsset ?? this.logoAsset,
+      symbolAsset: symbolAsset ?? this.symbolAsset,
+    );
+  }
+
+  @override
+  StarforgeBrandTheme lerp(covariant StarforgeBrandTheme? other, double t) {
+    if (other == null) return this;
+    return t < .5 ? this : other;
+  }
 }

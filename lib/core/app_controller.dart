@@ -18,12 +18,15 @@ enum StaffRole {
 }
 
 enum AccentChoice {
-  // Keep the persisted enum names stable while aligning the four choices with
-  // the shared Starforge web palettes: Saroy, Marvarid, Samarqand, and Daryo.
-  indigo(Color(0xFFB85535), Color(0xFFE4815B)),
-  ocean(Color(0xFF1F6B66), Color(0xFF67BBB4)),
-  coral(Color(0xFF2A3D8F), Color(0xFF8294E3)),
-  forest(Color(0xFF4F6A3A), Color(0xFF8DAA72));
+  // Keep the original persisted enum names stable while exposing the complete
+  // approved Starforge palette shared by the web products.
+  indigo(Color(0xFFB85535), Color(0xFFB85535)),
+  ocean(Color(0xFF087E88), Color(0xFF087E88)),
+  coral(Color(0xFF5548DF), Color(0xFF6558F5)),
+  forest(Color(0xFF087F5B), Color(0xFF087F5B)),
+  azure(Color(0xFF0B6ECF), Color(0xFF0B6ECF)),
+  amber(Color(0xFF9B6414), Color(0xFF9B6414)),
+  heritage(Color(0xFF913F2A), Color(0xFFB85535));
 
   const AccentChoice(this.color, this.darkColor);
   final Color color;
